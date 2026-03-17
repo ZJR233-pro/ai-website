@@ -29,60 +29,43 @@ img{max-width:100%;border-radius:12px}
 <body>
 <div class="main">
 <h1>✨ AI真实生成</h1>
-<p class="desc">输入中文提示词，nanobonano 生成真实图片</p>
-<input class="prompt" id="p" placeholder="例如：可爱的女孩，古风，汉服，3D，高清">
-<button onclick="go()">生成图片</button>
+<p class="desc">输入中文提示词，免费生成高清图片</p>
+<input class="prompt" id="p" placeholder="例如：可爱女孩、古风汉服、3D卡通、风景、机器人">
+<button onclick="go()">🚀 生成图片</button>
 <div class="result" id="res"></div>
 </div>
 <script>
 async function go(){
   const res = document.getElementById('res');
   const prompt = document.getElementById('p').value;
-  if(!prompt){alert('请输入提示词');return}
+  if(!prompt) { alert('请输入提示词'); return; }
   res.innerHTML = "⏳ 生成中...";
-  
+
   const resp = await fetch("/api/generate", {
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({ prompt })
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ prompt })
   });
   const data = await resp.json();
-  if(data.image){
-    res.innerHTML = '<img src="'+data.image+'">';
-  }else{
-    res.innerHTML = "❌ 生成失败";
-  }
+  res.innerHTML = '<img src="'+data.url+'">';
 }
 </script>
 </body></html>
   `);
 });
 
-// ==============================
-// 👇 nanobonano 真实图片生成接口
-// ==============================
+// 免费真实AI画图接口（无密钥、稳定、支持中文）
 app.post('/api/generate', async (req, res) => {
   try {
-    const prompt = req.body.prompt;
-    const response = await fetch("https://api.nanobonano.com/v1/generate", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer 你的API密钥"
-      },
-      body: JSON.stringify({
-        prompt: prompt,
-        size: "1024x1024"
-      })
-    });
-    const data = await response.json();
-    res.json({ image: data.image_url || "" });
-  } catch (err) {
-    res.json({ image: "https://picsum.photos/1024" });
+    const prompt = encodeURIComponent(req.body.prompt);
+    const imageUrl = \`https://image.pollinations.ai/prompt/\${prompt}?width=1024&height=1024\`;
+    res.json({ url: imageUrl });
+  } catch (e) {
+    res.json({ url: "https://picsum.photos/1024" });
   }
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log("✅ AI网站已运行");
+  console.log("✅ AI网站已正常运行");
 });
