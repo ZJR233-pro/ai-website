@@ -89,4 +89,4 @@ app.post('/api/real-video', async (req, res) => {
   res.json({ url: "https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4" });
 });
 
-app.listen(5000, () => console.log("✅ 启动成功"));
+app.listen(process.env.PORT || 3000, () => console.log("✅ AI网站启动成功！"));
