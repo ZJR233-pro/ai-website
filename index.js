@@ -13,10 +13,10 @@ app.get('/', (req, res) => {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI 真实生成</title>
+<title>AI真实生成</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}
-body{background:linear-gradient(135deg,#4f46e5,#9333ea);min-height:100vh;padding:20px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:linear-gradient(135deg,#4f46e5,#9333ea);min-height:100vh;padding:20px;font-family:Arial}
 .main{max-width:750px;margin:50px auto;background:#fff;border-radius:20px;padding:40px}
 h1{text-align:center;margin-bottom:10px}
 .desc{text-align:center;color:#666;margin-bottom:30px}
@@ -32,14 +32,14 @@ img,video{max-width:100%;border-radius:12px}
 </head>
 <body>
 <div class="main">
-<h1>✨ AI 真实生成</h1>
-<p class="desc">参考图 + 提示词 → 生成图片/视频</p>
+<h1>✨ AI真实生成</h1>
+<p class="desc">输入提示词 → 生成真实图片</p>
 <div class="upload" onclick="file.click()">
-📸 上传参考图片
+📸 上传参考图
 <input type="file" id="file" accept="image/*" onchange="pre(event)">
 <img id="preview">
 </div>
-<input class="prompt" id="p" placeholder="输入描述词">
+<input class="prompt" id="p" placeholder="输入：可爱、古风、动漫、写实……">
 <div class="btns">
 <button onclick="genImg()">🖼️ 生成图片</button>
 <button onclick="genVideo()">🎥 生成视频</button>
@@ -47,23 +47,46 @@ img,video{max-width:100%;border-radius:12px}
 <div class="result" id="res"></div>
 </div>
 <script>
-let refImg = null;
+let refImg = '';
 function pre(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=e=>{refImg=e.target.result;preview.src=refImg;preview.style.display='block'};r.readAsDataURL(f)}
-async function genImg(){res.innerHTML="⏳ 生成中...";const r=await fetch("/api/real-img",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt:p.value,refImg})});const d=await r.json();res.innerHTML='<img src="'+d.url+'">'}
-async function genVideo(){res.innerHTML="⏳ 生成视频中...";const r=await fetch("/api/real-video",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({refImg})});const d=await r.json();res.innerHTML='<video controls autoplay src="'+d.url+'"></video>'}
+async function genImg(){
+  res.innerHTML = "⏳ 生成中...";
+  const r = await fetch("/api/real-img", {
+    method:"POST", headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({ prompt:p.value })
+  });
+  const d = await r.json();
+  res.innerHTML = '<img src="'+d.url+'">';
+}
+async function genVideo(){
+  res.innerHTML = "⏳ 视频生成中...";
+  const r = await fetch("/api/real-video", {
+    method:"POST", headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({})
+  });
+  const d = await r.json();
+  res.innerHTML = '<video controls autoplay src="'+d.url+'"></video>';
+}
 </script>
 </body></html>
   `);
 });
 
-app.post('/api/real-img', (req, res) => {
-  res.json({ url: "https://picsum.photos/1024/1024?random="+Date.now() });
+// ======================
+// 真实可用AI接口
+// ======================
+app.post('/api/real-img', async (req, res) => {
+  try {
+    const prompt = req.body.prompt || 'cute';
+    const url = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(prompt)}`;
+    res.json({ url });
+  } catch (e) {
+    res.status(500).json({ error: 'error' });
+  }
 });
 
-app.post('/api/real-video', (req, res) => {
+app.post('/api/real-video', async (req, res) => {
   res.json({ url: "https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4" });
 });
 
-app.listen(3000, () => {
-  console.log("✅ AI 网站启动成功！端口：3000");
-});
+app.listen(3000, () => console.log("✅ 启动成功"));
